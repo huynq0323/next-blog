@@ -3,6 +3,7 @@ import React from 'react'
 import { Menu, MenuProps } from "antd";
 import { useState } from "react";
 import Link from 'next/link';
+import AvatarDropdown from './AvatarDropdown';
 
 function Header() {
   const [current, setCurrent] = useState<string>('user');
@@ -39,14 +40,15 @@ function Header() {
   };
 
   return (
-    <div>
+    <div className='flex justify-between items-center p-4 bg-white shadow-md'>
       <Menu
         onClick={onClick}
         selectedKeys={[current]}
         mode="horizontal"
         items={items}
-        className="capitalize"
+        className="capitalize flex-1 !border-0"
       />
+      <AvatarDropdown />
     </div>
   )
 }

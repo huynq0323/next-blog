@@ -4,22 +4,20 @@ import { Form, Input, Button, message } from 'antd';
 import { useAuth } from '@/contexts/auth.context';
 import { useState } from 'react';
 import axios from '@/utils/axios';
+import { ILogin } from '@/types/auth';
+import { login } from '@/services/auth.service';
 
-interface LoginFormValues {
-  email: string;
-  password: string;
-}
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { authLogin } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  const onFinish = async (values: LoginFormValues) => {
+  const onFinish = async (values: ILogin) => {
     setLoading(true);
     try {
-      const res = await axios.post('/auth/login', values); // 🔁 Gọi API backend
+      const res = await login(values); // 🔁 Gọi API backend
       const { accessToken, refreshToken } = res.data;
-      login({ accessToken, refreshToken }); // 👉 Gọi context login
+      authLogin({ accessToken, refreshToken }); // 👉 Gọi context login
       message.success('Đăng nhập thành công!');
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Đăng nhập thất bại';

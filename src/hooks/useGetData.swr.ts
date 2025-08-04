@@ -13,8 +13,8 @@ type UseGetDataOptions<T> = {
 
 export const useGetData = <T = unknown>({
   key = 'data',
-  fetcher,
-  params = {},
+  fetcher, //hàm call api
+  params = {}, 
   enabled = true,
   initialData,
 }: UseGetDataOptions<T>) => {

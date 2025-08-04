@@ -1,12 +1,14 @@
-'use client';
-import UserTable from '@/components/admin/UserTable';
+import UserTable from '@/app/admin/users/components/UserTable';
+import { useGetData } from '@/hooks/useGetData.swr';
+import { getUser } from '@/services/user.service';
 import React from 'react'
 
-function User() {
+async function User() {
+  const initialData = await getUser({ pageSize: 1 });
   return (
-    <div>
+    <div className='layout-table'>
       <h2 className="text-2xl font-semibold mb-4">Quản lý người dùng</h2>
-      <UserTable />
+      <UserTable {...initialData} />
     </div>
   )
 }

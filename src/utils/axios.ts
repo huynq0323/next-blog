@@ -1,14 +1,14 @@
 import axios from "axios";
 import Cookies from "js-cookie";
+import { getToken } from "./getToken";
 
 const Axios = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
 });
-const token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiMTM3MjI2NS1hMTFiLTQyNjYtOWY5Ni1mMTFkNzhkMzdlYTEiLCJpYXQiOjE3NTQwMzgyNzQsImV4cCI6MTc1NDA0MTg3NH0.cwqiVC9r8BfY2PrUtiKU41cLuLejBxsREx7u-8QOwNY`;
 
 Axios.interceptors.request.use(
-  (config) => {
-    const token = Cookies.get("accessToken");
+  async (config) => {
+    const token = await getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -22,18 +22,15 @@ Axios.interceptors.request.use(
 Axios.interceptors.response.use(
   (res) => res,
   async (error) => {
+    const token = await getToken();
     const originalRequest = error.config;
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      Cookies.get("refreshToken")
-    ) {
+    if (error.response?.status === 401 && !originalRequest._retry && token) {
       originalRequest._retry = true;
       try {
         const res = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
           {
-            refreshToken: Cookies.get("refreshToken"),
+            refreshToken: token,
           }
         );
         const { accessToken } = res.data;
