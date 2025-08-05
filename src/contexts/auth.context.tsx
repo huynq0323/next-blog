@@ -1,11 +1,12 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
+// import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode'; // ✅ Sửa import
 import { useRouter } from 'next/navigation';
-import { Role } from '@/constants/auth.constant';
-import { getToken } from '@/utils/getToken';
+import { AUTH, Role } from '@/constants/auth.constant';
+import { getToken } from '@/utils/tokens';
+import { deleteCookie, setCookie } from 'cookies-next';
 
 interface JwtPayload {
   sub: string;
@@ -49,8 +50,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const authLogin = ({ accessToken, refreshToken }: { accessToken: string; refreshToken: string }) => {
     try {
-      Cookies.set('accessToken', accessToken);
-      Cookies.set('refreshToken', refreshToken);
+      setCookie(AUTH.ACCESS_TOKEN, accessToken)
+      setCookie(AUTH.REFRESH_TOKEN, refreshToken)
+      // Cookies.set(AUTH.ACCESS_TOKEN, accessToken);
+      // Cookies.set(AUTH.REFRESH_TOKEN, refreshToken);
 
       const decoded = jwtDecode<JwtPayload>(accessToken);
       setUser(decoded);
@@ -67,8 +70,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = () => {
-    Cookies.remove('accessToken');
-    Cookies.remove('refreshToken');
+    deleteCookie(AUTH.ACCESS_TOKEN)
+    deleteCookie(AUTH.REFRESH_TOKEN)
+    // Cookies.remove(AUTH.ACCESS_TOKEN);
+    // Cookies.remove(AUTH.REFRESH_TOKEN);
     setUser(null);
     setRole(null);
     router.push('/login');

@@ -1,12 +1,12 @@
-'use client'
-import PostTable from '@/components/admin/PostTable'
+import { getPost } from '@/services/post.service';
 import React from 'react'
+import PostTable from './components/PostTable';
 
-function Post() {
+async function Post() {
+  const initialData = await getPost({ pageSize: 10 });
   return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-4">Quản lý bài viết</h2>
-      <PostTable />
+    <div className='layout-table'>
+      <PostTable {...initialData} />
     </div>
   )
 }

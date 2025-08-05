@@ -1,9 +1,12 @@
+/* globals.css */
 @import "tailwindcss";
+@import "../styles/css/apply.css";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
+
 
 @theme inline {
   --color-background: var(--background);

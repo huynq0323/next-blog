@@ -1,0 +1,13 @@
+.layout-table {
+  @apply mt-1 p-4 bg-white;
+}
+
+.btn-press {
+  @apply active:scale-95 transition-transform duration-100;
+}
+
+.header-menu {
+  .label {
+    @apply hover:!bg-gray-100 !bg-transparent transition-colors !rounded-[8px] leading-[36px];
+  }
+}

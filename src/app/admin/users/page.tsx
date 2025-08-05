@@ -4,10 +4,9 @@ import { getUser } from '@/services/user.service';
 import React from 'react'
 
 async function User() {
-  const initialData = await getUser({ pageSize: 1 });
+  const initialData = await getUser({ pageSize: 10 });
   return (
     <div className='layout-table'>
-      <h2 className="text-2xl font-semibold mb-4">Quản lý người dùng</h2>
       <UserTable {...initialData} />
     </div>
   )

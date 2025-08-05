@@ -1,52 +1,24 @@
+// UserTable.tsx
 'use client';
-import { useGetData } from '@/hooks/useGetData.swr';
-import { getUser } from '@/services/user.service';
-import { getSerialNumber } from '@/utils/utils';
-import { Button, Space, Table, TableProps } from 'antd'
-import Link from 'next/link';
-import React, { useEffect, useState } from 'react'
-import useSWR from 'swr';
 
+import React from 'react';
+import { Button, Space, Table, TableProps } from 'antd';
+import { DeleteTwoTone, EditTwoTone } from '@ant-design/icons';
+import { getSerialNumber } from '@/utils/utils';
+import { useUserTable } from '../hooks/useUserTable';
 
 function UserTable(initialData: IResponseGetDataDto<any>) {
-  const [pagination, setPagination] = useState<IPaginationTable>({
-    page: 1,
-    pageSize: 1,
-    total: 0
-  });
-
-  const { data, isLoading, error, refetch } = useGetData({
-    key: 'admin-get-users',
-    fetcher: getUser,
-    params: {
-      page: pagination.page,
-      pageSize: pagination.pageSize
-    },
-    enabled: true,
-    initialData
-  });
-
-  const handleTableChange = (
-    newPagination: IPaginationTable,
-  ) => {
-    setPagination({
-      ...pagination,
-      page: newPagination.current,
-      pageSize: newPagination.pageSize,
-    });
-  };
-
-  useEffect(() => {
-    if (data) {
-      setPagination({ ...pagination, total: data.total });
-    }
-  }, [data?.total]);
-
+  const {
+    dataSource,
+    loading,
+    pagination,
+    handleTableChange,
+  } = useUserTable(initialData);
 
   const columns: TableProps<any>['columns'] = [
     {
       title: 'No',
-      render: (_, record, index) => getSerialNumber(index, pagination.page, pagination.pageSize),
+      render: (_, __, index) => getSerialNumber(index, pagination.page, pagination.pageSize),
     },
     {
       title: 'Name',
@@ -63,9 +35,8 @@ function UserTable(initialData: IResponseGetDataDto<any>) {
       key: 'action',
       render: (_, record) => (
         <Space>
-          <Link href={`/blogs/${record?.id}`}><Button color="primary" variant="outlined">View</Button></Link>
-          <Button color="purple" variant="outlined">Edit</Button>
-          <Button color="danger" variant="outlined">Delete</Button>
+          <DeleteTwoTone twoToneColor="#ff4d4f" />
+          <EditTwoTone twoToneColor="#1890ff" />
         </Space>
       ),
     },
@@ -73,20 +44,28 @@ function UserTable(initialData: IResponseGetDataDto<any>) {
 
   return (
     <div>
+      <div className='flex justify-between items-center mx-2'>
+        <h2 className="text-2xl font-semibold mb-4">Quản lý người dùng</h2>
+        <Button type="primary" className="btn-press">
+          Thêm mới
+        </Button>
+      </div>
+
       <Table
         columns={columns}
-        dataSource={data?.data || []}
+        dataSource={dataSource}
+        loading={loading}
         rowKey="id"
         pagination={{
           current: pagination.page,
           pageSize: pagination.pageSize,
-          total: pagination?.total || 0,
+          total: pagination.total,
           showSizeChanger: true,
         }}
         onChange={handleTableChange}
       />
     </div>
-  )
+  );
 }
 
-export default UserTable
+export default UserTable;

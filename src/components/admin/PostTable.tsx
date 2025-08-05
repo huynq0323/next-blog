@@ -1,8 +1,16 @@
+import { usePostTable } from '@/app/admin/posts/hooks/usePostTable';
 import { Button, Space, Table, TableProps } from 'antd'
 import Link from 'next/link';
 import React from 'react'
 
-function PostTable() {
+function PostTable(initialData: IResponseGetDataDto<any>) {
+  const {
+    dataSource,
+    loading,
+    pagination,
+    handleTableChange,
+  } = usePostTable(initialData);
+
   const columns: TableProps<any>['columns'] = [
     {
       title: 'No',
@@ -32,11 +40,25 @@ function PostTable() {
   ];
   return (
     <div>
-      <Table<IBlog>
+      <div className='flex justify-between items-center mx-2'>
+        <h2 className="text-2xl font-semibold mb-4">Quản lý người dùng</h2>
+        <Button type="primary" className="btn-press">
+          Thêm mới
+        </Button>
+      </div>
+
+      <Table
         columns={columns}
-        // dataSource={(data || []).sort((i: IBlog) => i?.id)}
-        dataSource={[]}
+        dataSource={dataSource}
+        loading={loading}
         rowKey="id"
+        pagination={{
+          current: pagination.page,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
+          showSizeChanger: true,
+        }}
+        onChange={handleTableChange}
       />
     </div>
   )

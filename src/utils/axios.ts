@@ -1,6 +1,7 @@
 import axios from "axios";
-import Cookies from "js-cookie";
-import { getToken } from "./getToken";
+import { refreshToken } from "@/services/auth.service";
+import { AUTH } from "@/constants/auth.constant";
+import { cookie } from "./universal-cookie";
 
 const Axios = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -8,42 +9,39 @@ const Axios = axios.create({
 
 Axios.interceptors.request.use(
   async (config) => {
-    const token = await getToken();
+    const token = await cookie.get(AUTH.ACCESS_TOKEN); // ✅ dùng cookie helper
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 Axios.interceptors.response.use(
   (res) => res,
   async (error) => {
-    const token = await getToken();
+    const token = await cookie.get(AUTH.ACCESS_TOKEN);
     const originalRequest = error.config;
+
     if (error.response?.status === 401 && !originalRequest._retry && token) {
       originalRequest._retry = true;
       try {
-        const res = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
-          {
-            refreshToken: token,
-          }
-        );
-        const { accessToken } = res.data;
-        Cookies.set("accessToken", accessToken);
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        return Axios(originalRequest);
+        const refToken = (await cookie.get(AUTH.REFRESH_TOKEN)) || "";
+        const res = await refreshToken(refToken);
+        const { accessToken } = res?.data;
+        await cookie.set(AUTH.ACCESS_TOKEN, accessToken); // ✅ set lại token
+        return Axios(originalRequest); // retry
       } catch (err) {
-        Cookies.remove("accessToken");
-        Cookies.remove("refreshToken");
-        window.location.href = "/login";
+        await cookie.remove(AUTH.ACCESS_TOKEN); // ✅ xoá token
+        await cookie.remove(AUTH.REFRESH_TOKEN);
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
         return Promise.reject(err);
       }
     }
+
     return Promise.reject(error);
   }
 );

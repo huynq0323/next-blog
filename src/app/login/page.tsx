@@ -15,9 +15,10 @@ export default function LoginPage() {
   const onFinish = async (values: ILogin) => {
     setLoading(true);
     try {
-      const res = await login(values); // 🔁 Gọi API backend
+      const res = await login(values);
+      debugger
       const { accessToken, refreshToken } = res.data;
-      authLogin({ accessToken, refreshToken }); // 👉 Gọi context login
+      authLogin({ accessToken, refreshToken });
       message.success('Đăng nhập thành công!');
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Đăng nhập thất bại';

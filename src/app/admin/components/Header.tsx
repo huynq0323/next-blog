@@ -14,24 +14,28 @@ function Header() {
         <Link href={'/admin/users'} >User</Link>
       ),
       key: 'user',
+      className: 'label'
     },
     {
       label: (
         <Link href={'/admin/posts'} >Post</Link>
       ),
       key: 'post',
+      className: 'label'
     },
     {
       label: (
         <Link href={'/admin/comments'} >Comment</Link>
       ),
       key: 'comment',
+      className: 'label'
     },
     {
       label: (
         <Link href={'/admin/tags'} >Tag</Link>
       ),
       key: 'tag',
+      className: 'label'
     },
   ];
 
@@ -40,13 +44,13 @@ function Header() {
   };
 
   return (
-    <div className='flex justify-between items-center p-4 bg-white shadow-md'>
+    <div className='header-menu flex justify-between items-center p-3 bg-white shadow-md border-[#F5F5F5] border-b-2'>
       <Menu
         onClick={onClick}
         selectedKeys={[current]}
         mode="horizontal"
         items={items}
-        className="capitalize flex-1 !border-0"
+        className="capitalize flex-1 !border-0 h-[36px]"
       />
       <AvatarDropdown />
     </div>
