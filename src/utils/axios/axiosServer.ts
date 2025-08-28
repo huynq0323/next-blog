@@ -1,19 +1,20 @@
 import axios from "axios";
+import { cookie } from "../universal-cookie";
 import { AUTH } from "@/constants/auth.constant";
-import { cookie } from "./universal-cookie";
+import { redirect } from "next/navigation";
 
-const isClient = typeof window !== "undefined";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const SERVER_URL = process.env.NEXT_SERVER_URL;
-let isRefreshing = false;
-let refreshPromise: Promise<any> | null = null;
 
-const Axios= axios.create({
+const axiosServer = axios.create({
   baseURL: API_URL,
   withCredentials: true,
 });
 
-Axios.interceptors.response.use(
+let isRefreshing = false;
+let refreshPromise: Promise<any> | null = null;
+
+axiosServer.interceptors.response.use(
   (res) => res,
   async (err) => {
     const refreshToken = (await cookie.get(AUTH.REFRESH_TOKEN)) || "";
@@ -25,18 +26,18 @@ Axios.interceptors.response.use(
       if (!isRefreshing) {
         isRefreshing = true;
 
-        refreshPromise = fetch(
-          `${isClient ? "" : SERVER_URL}/api/auth/refresh`,
-          {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ refreshToken }),
-          }
-        )
+        refreshPromise = fetch(`${SERVER_URL}/api/auth/refresh`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken }),
+        })
           .then((res) => {
-            if (!res.ok) throw new Error("Refresh failed");
-            return res.json();
+            if (!res.ok) {
+              redirect("/login");
+            } else {
+              return res.json();
+            }
           })
           .finally(() => {
             isRefreshing = false;
@@ -45,11 +46,11 @@ Axios.interceptors.response.use(
 
       const data = await refreshPromise;
       originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-      return Axios(originalRequest);
+      return axiosServer(originalRequest);
     }
 
     return Promise.reject(err);
   }
 );
 
-export default Axios;
+export default axiosServer;

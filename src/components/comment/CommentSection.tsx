@@ -1,17 +1,22 @@
 'use client';
+import { AUTH } from '@/constants/auth.constant';
 import { COMMENT_SOCKET_EVENTS } from '@/constants/socket.constant';
 import { createComment, deleteComment, getCommentsByIdPost, updateComment } from '@/services/comment.service';
 import { getSocket } from '@/utils/socket/socket';
+import { cookie } from '@/utils/universal-cookie';
 import { SendOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { useEffect, useState } from 'react';
+import Cookies from "js-cookie";
 
 export default function CommentSection({ postId }: { postId: string }) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const socket = getSocket();
+
+  const currentUserId = Cookies.get(AUTH.USER_ID) || '';
 
   const handleSubmit = async () => {
     if (!content.trim()) return;
@@ -57,11 +62,6 @@ export default function CommentSection({ postId }: { postId: string }) {
     };
   }, [postId]);
 
-  const currentUser = {
-    id: 'b1372265-a11b-4266-9f96-f11d78d37ea1',
-    name: 'Nguyễn Văn A',
-  };
-
   const handleEdit = async (commentId: string, oldContent: string) => {
     const newContent = prompt('Nhập nội dung mới:', oldContent);
     if (!newContent || newContent === oldContent) return;
@@ -83,8 +83,8 @@ export default function CommentSection({ postId }: { postId: string }) {
     } catch (err) {
       alert('Không thể xoá bình luận');
     }
-
   };
+  
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold">Bình luận</h2>
@@ -112,7 +112,7 @@ export default function CommentSection({ postId }: { postId: string }) {
             <p className="text-sm font-medium">{cmt.author.name}</p>
             <p className="text-gray-700">{cmt.content}</p>
             <p className="text-xs text-gray-400">{new Date(cmt.createdAt).toLocaleString('vi-VN')}</p>
-            {cmt.author.id === currentUser.id && (
+            {cmt.author.id === currentUserId && (
               <div className="space-x-2 mt-1">
                 <Button size="small" onClick={() => handleEdit(cmt.id, cmt.content)}>Sửa</Button>
                 <Button size="small" danger onClick={() => handleDelete(cmt.id)}>Xoá</Button>

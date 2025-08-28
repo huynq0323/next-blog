@@ -8,6 +8,8 @@ export enum Role {
 export const AUTH = {
   ACCESS_TOKEN: "accessToken",
   REFRESH_TOKEN: "refreshToken",
+  ROLE: "role",
+  USER_ID: "userId",
 };
 
 export const DECODED_JWT = {

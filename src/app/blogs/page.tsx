@@ -1,10 +1,9 @@
-import { getBlogs } from '@/services/blog.service';
+import { getBlogsServer } from '@/services/blog.service';
 import Link from 'next/link'
 import React from 'react'
 
 async function Blogs() {
-  const blogs = await getBlogs();
-
+  const blogs = await getBlogsServer();
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Tất cả bài viết</h1>

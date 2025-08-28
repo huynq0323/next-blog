@@ -1,12 +1,13 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-// import Cookies from 'js-cookie';
-import { jwtDecode } from 'jwt-decode'; // ✅ Sửa import
+import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'next/navigation';
 import { AUTH, Role } from '@/constants/auth.constant';
-import { getToken } from '@/utils/tokens';
+import { getToken, isTokenExpired } from '@/utils/tokens';
 import { deleteCookie, setCookie } from 'cookies-next';
+import { ROUTES } from '@/constants/routes.constant';
+import { cookie } from '@/utils/universal-cookie';
 
 interface JwtPayload {
   sub: string;
@@ -35,16 +36,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const checkToken = async () => {
-    const token = await getToken();
+    const token = await cookie.get(AUTH.ACCESS_TOKEN);
     if (token) {
       try {
         const decoded = jwtDecode<JwtPayload>(token);
         setUser(decoded);
         setRole(decoded.role);
       } catch (err) {
-        console.error('Invalid token:', err);
-        logout(); // auto logout nếu token lỗi
+        logout();
       }
+    } else {
+      logout();
     }
   }
 
@@ -52,17 +54,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setCookie(AUTH.ACCESS_TOKEN, accessToken)
       setCookie(AUTH.REFRESH_TOKEN, refreshToken)
-      // Cookies.set(AUTH.ACCESS_TOKEN, accessToken);
-      // Cookies.set(AUTH.REFRESH_TOKEN, refreshToken);
 
       const decoded = jwtDecode<JwtPayload>(accessToken);
+      setCookie(AUTH.ROLE, decoded.role);
+      setCookie(AUTH.USER_ID, decoded.sub);
       setUser(decoded);
       setRole(decoded.role);
 
       if (decoded.role === Role.ADMIN) {
-        router.push('/admin');
+        router.push(ROUTES.ADMIN);
       } else {
-        router.push('/blogs');
+        router.push(ROUTES.BLOGS);
       }
     } catch (error) {
       console.error('Login decode error:', error);
@@ -72,8 +74,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     deleteCookie(AUTH.ACCESS_TOKEN)
     deleteCookie(AUTH.REFRESH_TOKEN)
-    // Cookies.remove(AUTH.ACCESS_TOKEN);
-    // Cookies.remove(AUTH.REFRESH_TOKEN);
     setUser(null);
     setRole(null);
     router.push('/login');

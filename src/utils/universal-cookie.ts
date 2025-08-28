@@ -1,4 +1,3 @@
-
 let jsCookie: any = null;
 let nextCookies: any = null;
 
@@ -16,17 +15,20 @@ const init = async () => {
 type CookieOptions = {
   maxAge?: number;
   path?: string;
+  httpOnly?: boolean;
 };
 
 export const cookie = {
   get: async (key: string): Promise<string | undefined> => {
     await init();
-    return isClient
-      ? jsCookie?.get(key)
-      : nextCookies?.get(key)?.value;
+    return isClient ? jsCookie?.get(key) : nextCookies?.get(key)?.value;
   },
 
-  set: async (key: string, value: string, options: CookieOptions = {}): Promise<void> => {
+  set: async (
+    key: string,
+    value: string,
+    options: CookieOptions = {}
+  ): Promise<void> => {
     await init();
     if (isClient) {
       jsCookie?.set(key, value, { path: "/", ...options });

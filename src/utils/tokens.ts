@@ -1,6 +1,13 @@
 import { AUTH } from "@/constants/auth.constant";
+import { jwtDecode } from "jwt-decode";
 const Cookies = (await import("js-cookie")).default;
 const { cookies } = await import("next/headers");
+
+interface JWTPayload {
+  exp: number;
+  iat: number;
+  [key: string]: any;
+}
 
 export const getToken = async (): Promise<string | undefined> => {
   if (typeof window !== "undefined") {
@@ -10,59 +17,14 @@ export const getToken = async (): Promise<string | undefined> => {
   }
 };
 
-export const getRefreshToken = async (): Promise<string | undefined> => {
-  if (typeof window !== "undefined") {
-    return Cookies.get(AUTH.REFRESH_TOKEN);
-  } else {
-    return (await cookies()).get(AUTH.REFRESH_TOKEN)?.value;
-  }
-};
+export function isTokenExpired(token: string): boolean {
+  try {
+    const decoded: JWTPayload = jwtDecode(token);
+    if (!decoded.exp) return true;
 
-export const removeToken = async () => {
-  if (typeof window !== "undefined") {
-    Cookies.remove(AUTH.ACCESS_TOKEN);
-  } else {
-    (await cookies()).delete(AUTH.ACCESS_TOKEN);
+    // exp trong JWT là đơn vị giây, Date.now() là ms
+    return Date.now() >= decoded.exp * 1000;
+  } catch (e) {
+    return true; // token không decode được => coi như hết hạn
   }
-};
-
-export const removeRefreshToken = async () => {
-  if (typeof window !== "undefined") {
-    Cookies.remove(AUTH.REFRESH_TOKEN);
-  } else {
-    (await cookies()).delete(AUTH.REFRESH_TOKEN);
-  }
-};
-
-export const setToken = async (
-  value: string,
-  options: { maxAge?: number } = {}
-) => {
-  if (typeof window !== "undefined") {
-    console.log("window");
-    Cookies.set(AUTH.ACCESS_TOKEN, value, {
-      path: "/",
-      ...options,
-    });
-  } else {
-    console.log("server");
-    (await cookies()).set(AUTH.ACCESS_TOKEN, value);
-  }
-};
-
-export const setRefreshToken = async (
-  value: string,
-  options: { maxAge?: number } = {}
-) => {
-  if (typeof window !== "undefined") {
-    Cookies.set(AUTH.REFRESH_TOKEN, value, {
-      path: "/",
-      ...options,
-    });
-  } else {
-    (await cookies()).set(AUTH.REFRESH_TOKEN, value, {
-      path: "/",
-      ...options,
-    });
-  }
-};
+}

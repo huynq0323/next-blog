@@ -29,7 +29,11 @@ export function cleanParamsMaxSize(input: Record<string, any>) {
   return { params };
 }
 
-export function getSerialNumber(index: number, page?: number, pageSize?: number): number {
+export function getSerialNumber(
+  index: number,
+  page?: number,
+  pageSize?: number
+): number {
   if (!page || !pageSize) return index + 1;
   return (page - 1) * pageSize + index + 1;
 }

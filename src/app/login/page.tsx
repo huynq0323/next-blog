@@ -16,7 +16,6 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const res = await login(values);
-      debugger
       const { accessToken, refreshToken } = res.data;
       authLogin({ accessToken, refreshToken });
       message.success('Đăng nhập thành công!');
